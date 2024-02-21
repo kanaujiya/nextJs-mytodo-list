@@ -22,6 +22,9 @@ export default function Home() {
   const [todoInput, setTodoInput] = useState("");
   const [todos, setTodos] = useState([]);
   const [inputError, setInputError] = useState("");
+  const [actionType, setActionType] = useState("add");
+  const [documentId, setDocumentId] = useState('');
+  const [show, setShow] = useState(false);
   const { authUser, isLoading, signOut } = useAuth();
   const router = useRouter();
 
@@ -35,22 +38,37 @@ export default function Home() {
   }, [authUser, isLoading]);
 
   const addTodos = async () => {
-    try {
-      if (todoInput.length > 0) {
-        setInputError("");
-        const docRef = await addDoc(collection(db, "tooodooo"), {
-          owner: authUser.uid,
+    if (actionType === "edit") {
+      try {
+        await updateDoc(doc(db, "tooodooo", documentId), {
           content: todoInput,
-          completed: false,
         });
         fetchTodos(authUser.uid);
+        setActionType("add");
+        setDocumentId('');
         setTodoInput("");
-      } else {
-        setInputError("Please enter your task.");
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      try {
+        if (todoInput.length > 0) {
+          setInputError("");
+          const docRef = await addDoc(collection(db, "tooodooo"), {
+            owner: authUser.uid,
+            content: todoInput,
+            completed: false,
+          });
+          fetchTodos(authUser.uid);
+          setTodoInput("");
+        } else {
+          setInputError("Please enter your task.");
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
+
   };
 
   const fetchTodos = async (uid) => {
@@ -80,7 +98,6 @@ export default function Home() {
   };
 
   const markAsCompleted = async (e, docId) => {
-    console.log(e, docId);
     try {
       await updateDoc(doc(db, "tooodooo", docId), {
         completed: e.target.checked,
@@ -97,6 +114,38 @@ export default function Home() {
     }
   };
 
+  const selectAll = async (status) => {
+    try {
+      setShow(status);
+      todos.map((todo) => {
+        updateDoc(doc(db, "tooodooo", todo.id), {
+          completed: status,
+        });
+        fetchTodos(authUser.uid);
+      })
+    } catch (error) {
+      console.log(error);
+    }
+
+  };
+
+  const delectAll = async () => {
+    try {
+      todos.forEach((todo) => {
+        try {
+          deleteDoc(doc(db, "tooodooo", todo.id));
+          fetchTodos(authUser.uid);
+        } catch (error) {
+          console.log(error);
+        }
+      })
+      setShow(false);
+    } catch (error) {
+      console.log(error)
+    }
+
+  };
+
 
   return !authUser ? (
     <Loader />
@@ -110,10 +159,10 @@ export default function Home() {
         <span>Logout</span>
       </div>
       <div className="max-w-3xl mx-auto mt-10 p-8">
-        <div className="bg-white -m-6 p-3 sticky top-0">
+        <div className="bg-[#013220] -m-6 p-3 sticky top-0">
           <div className="flex justify-center flex-col items-center">
             <span className="text-7xl mb-10">📝</span>
-            <h1 className="text-5xl md:text-7xl font-bold">ToooDooo's</h1>
+            <h1 className="text-5xl md:text-7xl font-bold text-white">My Todo's List</h1>
           </div>
           <div className="flex items-center gap-2 mt-10">
             <input
@@ -129,16 +178,22 @@ export default function Home() {
             />
 
             <button
-              onClick={addTodos}
+              onClick={() => addTodos()}
               className="w-[60px] h-[60px] rounded-md bg-black flex justify-center items-center cursor-pointer transition-all duration-300 hover:bg-black/[0.8]"
             >
               <AiOutlinePlus size={30} color="#fff" />
             </button>
           </div>
           <span>{inputError}</span>
+          <div className="flex gap-3">
+            {(!show && todos.length > 0) && <button onClick={() => selectAll(true)} className="bg-black text-white w-44 py-4 mt-5 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">Select All</button>}
+            {show && <><button onClick={() => selectAll(false)} className="bg-black text-white w-44 py-4 mt-5 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">Unselect All</button>
+              <button onClick={delectAll} className="bg-black text-white w-44 py-4 mt-5 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">Delete All</button>
+            </>}
+          </div>
         </div>
-        <div></div>
-        <div className="my-10">
+
+        <div className="my-10 ">
           {todos.length > 0 &&
             todos.map((todo, index) => (
               <div
@@ -155,21 +210,20 @@ export default function Home() {
                   />
                   <label
                     htmlFor={`todo-${index}`}
-                    className={`font-medium ${
-                      todo.completed ? "line-through" : ""
-                    }`}
+                    className={`font-medium text-white ${todo.completed ? "line-through" : ""
+                      }`}
                   >
                     {todo.content}
                   </label>
                 </div>
                 <div className="flex item-center justify-center gap-2">
-                  <div className="flex items-center gap-3">
+                  {!todo.completed && <div className="flex items-center gap-3">
                     <MdCreate
                       size={24}
                       className="text-green-400 cursor-pointer"
-                      onClick={(e) => setTodoInput(todo.content)}
+                      onClick={(e) => { setTodoInput(todo.content); setActionType('edit'); setDocumentId(todo.id) }}
                     />
-                  </div>
+                  </div>}
                   {todo.completed && (
                     <div className="flex items-center gap-3">
                       <MdDeleteForever

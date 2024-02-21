@@ -53,8 +53,8 @@ const RegisterForm = () => {
     <main className="flex lg:h-[120vh]">
       <div className="w-full lg:w-[60%] p-9 md:p-12 flex items-center justify-center lg:justify-start">
         <div className="p-8 w-[600px]">
-          <h1 className="text-6xl font-semibold">Sign Up</h1>
-          <p className="mt-6 ml-1">
+          <h1 className="text-6xl font-semibold text-white">Sign Up</h1>
+          <p className="mt-6 ml-1 text-white">
             Already have an account ?{" "}
             <Link href={"/login"} className="underline hover:text-blue-400 cursor-pointer">
               Login
@@ -63,37 +63,40 @@ const RegisterForm = () => {
 
           <div
             onClick={signWithGoogle}
-            className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group"
+            className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group"
           >
             <FcGoogle size={22} />
-            <span className="font-medium text-black group-hover:text-white">
+            <span className="font-medium text-white">
               Login with Google
             </span>
           </div>
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="mt-10 pl-1 flex flex-col">
-              <label>Name</label>
+              <label className="text-white">Name</label>
               <input
                 type="text"
                 className="font-medium border-b border-black p-4 outline-0 focus-within:border-blue-400"
+                placeholder="Enter your name"
                 required
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="mt-10 pl-1 flex flex-col">
-              <label>Email</label>
+              <label className="text-white">Email</label>
               <input
                 type="email"
                 className="font-medium border-b border-black p-4 outline-0 focus-within:border-blue-400"
+                placeholder="Enter your email."
                 required
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="mt-10 pl-1 flex flex-col">
-              <label>Password</label>
+              <label className="text-white">Password</label>
               <input
                 type="password"
                 className="font-medium border-b border-black p-4 outline-0 focus-within:border-blue-400"
+                placeholder="Enter your password."
                 required
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -110,7 +113,7 @@ const RegisterForm = () => {
       <div
         className="w-[40%] bg-slate-400 bg-cover bg-right-top hidden lg:block"
         style={{
-          backgroundImage: "url('/login-banner.jpg')",
+          backgroundImage: "url('/img1.jpg')",
         }}
       ></div>
     </main>
